@@ -1,0 +1,31 @@
+from fastapi import FastAPI, UploadFile, File, Form
+from fastapi.middleware.cors import CORSMiddleware
+from backend.utils.resume_parser import extract_text
+from backend.utils.scorer import score_resume
+
+app = FastAPI(title="AI Resume Screener")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/")
+def root():
+    return {"message": "Server is running"}
+
+@app.post("/parse-resume")
+async def parse_resume(file: UploadFile = File(...)):
+    content = await file.read()
+    text = extract_text(content, file.filename)
+    return {"text_preview": text[:1000]}
+
+@app.post("/score")
+async def score(file: UploadFile = File(...), job_description: str = Form(...)):
+    content = await file.read()
+    text = extract_text(content, file.filename)
+    score_data = score_resume(text, job_description)
+    return score_data

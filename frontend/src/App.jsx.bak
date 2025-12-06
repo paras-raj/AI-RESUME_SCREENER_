@@ -1,0 +1,280 @@
+import React, { useState, useRef } from 'react';
+import { DocumentText, Upload, X, CheckCircle, Sparkles } from 'lucide-react';
+
+export default function ResumeScreener() {
+  const [file, setFile] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [result, setResult] = useState(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const droppedFile = e.dataTransfer.files[0];
+    if (droppedFile && (droppedFile.type === 'application/pdf' || droppedFile.name.endsWith('.pdf'))) {
+      setFile(droppedFile);
+      setResult(null);
+    }
+  };
+
+  const handleFileSelect = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      setResult(null);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setFile(null);
+    setResult(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+  };
+
+  const simulateUpload = () => {
+    setIsUploading(true);
+    setUploadProgress(0);
+    
+    const interval = setInterval(() => {
+      setUploadProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            setIsUploading(false);
+            setResult({
+              text: `PROFESSIONAL SUMMARY\n\nHighly motivated Full Stack Developer with 5+ years of experience building scalable web applications using React, Node.js, and Python. Proven track record of delivering high-quality software solutions in fast-paced environments. Strong expertise in cloud technologies, microservices architecture, and agile methodologies.\n\nTECHNICAL SKILLS\n\n• Frontend: React, TypeScript, Next.js, Tailwind CSS, Redux\n• Backend: Node.js, Python, Django, Express.js, REST APIs\n• Database: PostgreSQL, MongoDB, Redis\n• Cloud: AWS (EC2, S3, Lambda), Docker, Kubernetes\n• Tools: Git, Jenkins, GitHub Actions, Jira\n\nPROFESSIONAL EXPERIENCE\n\nSenior Software Engineer | Tech Solutions Inc. | 2021 - Present\n• Led development of customer-facing dashboard serving 10K+ daily users\n• Implemented microservices architecture reducing deployment time by 40%\n• Mentored team of 5 junior developers\n• Optimized database queries improving application performance by 60%\n\nSoftware Engineer | Digital Innovations | 2019 - 2021\n• Built RESTful APIs handling 1M+ requests daily\n• Developed responsive web applications using React and TypeScript\n• Implemented CI/CD pipelines using Jenkins and Docker\n• Collaborated with cross-functional teams in agile environment\n\nEDUCATION\n\nBachelor of Science in Computer Science\nState University | 2015 - 2019\nGPA: 3.8/4.0`,
+              score: 87,
+              highlights: [
+                'React', 'TypeScript', 'Node.js', 'Python', 'AWS', 
+                'Docker', 'Kubernetes', 'PostgreSQL', 'MongoDB', 
+                'Microservices', 'CI/CD', 'REST APIs'
+              ],
+              filename: file.name
+            });
+          }, 500);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 150);
+  };
+
+  const getScoreColor = (score) => {
+    if (score >= 80) return 'bg-green-600';
+    if (score >= 60) return 'bg-yellow-500';
+    return 'bg-red-500';
+  };
+
+  const getScoreTextColor = (score) => {
+    if (score >= 80) return 'text-green-600';
+    if (score >= 60) return 'text-yellow-600';
+    return 'text-red-600';
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center mb-4">
+            <Sparkles className="h-10 w-10 text-indigo-500" />
+          </div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Resume Screener</h1>
+          <p className="text-lg text-gray-600">Upload a resume to extract skills, experience, and generate an automated screening score</p>
+        </div>
+
+        {/* Upload Card */}
+        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Upload Resume</h2>
+          
+          {!file ? (
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
+                isDragging 
+                  ? 'border-indigo-500 bg-indigo-50' 
+                  : 'border-gray-300 bg-gray-50'
+              }`}
+            >
+              <DocumentText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-700 font-medium mb-2">Drag and drop your resume here</p>
+              <p className="text-gray-500 text-sm mb-4">or</p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="inline-flex items-center px-6 py-3 bg-indigo-500 text-white font-medium rounded-lg hover:bg-indigo-600 transition-colors"
+              >
+                <Upload className="h-5 w-5 mr-2" />
+                Select File
+              </button>
+              <p className="text-gray-400 text-xs mt-4">Supports PDF files only</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {/* Selected File */}
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center flex-1 min-w-0">
+                  <DocumentText className="h-8 w-8 text-indigo-500 flex-shrink-0" />
+                  <div className="ml-3 min-w-0 flex-1">
+                    <p className="text-sm font-medium text-gray-900 truncate">{file.name}</p>
+                    <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleRemoveFile}
+                  className="ml-4 p-1 hover:bg-gray-200 rounded-full transition-colors flex-shrink-0"
+                >
+                  <X className="h-5 w-5 text-gray-500" />
+                </button>
+              </div>
+
+              {/* Upload Progress */}
+              {isUploading && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">Processing...</span>
+                    <span className="text-sm font-medium text-indigo-500">{uploadProgress}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-indigo-500 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Screen Button */}
+              {!isUploading && !result && (
+                <button
+                  onClick={simulateUpload}
+                  className="w-full py-3 bg-indigo-500 text-white font-medium rounded-lg hover:bg-indigo-600 transition-colors"
+                >
+                  Screen Resume
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Results Card */}
+        {result && (
+          <div className="bg-white rounded-xl shadow-md p-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900">Screening Results</h2>
+              <div className="flex items-center">
+                <CheckCircle className="h-6 w-6 text-green-600 mr-2" />
+                <span className="text-sm font-medium text-gray-600">Complete</span>
+              </div>
+            </div>
+
+            {/* Score */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold text-gray-700">Match Score</span>
+                <span className={`text-2xl font-bold ${getScoreTextColor(result.score)}`}>
+                  {result.score}%
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div
+                  className={`h-3 rounded-full transition-all duration-500 ${getScoreColor(result.score)}`}
+                  style={{ width: `${result.score}%` }}
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                {result.score >= 80 ? 'Excellent match for the position' : 
+                 result.score >= 60 ? 'Good match with some gaps' : 
+                 'Limited match for the position'}
+              </p>
+            </div>
+
+            {/* Skills Highlights */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">Key Skills Identified</h3>
+              <div className="flex flex-wrap gap-2">
+                {result.highlights.map((skill, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 bg-indigo-100 text-indigo-700 text-sm font-medium rounded-full"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Extracted Text */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-gray-700">Extracted Content</h3>
+                <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="text-sm text-indigo-500 hover:text-indigo-600 font-medium"
+                >
+                  {isExpanded ? 'Collapse' : 'Expand'}
+                </button>
+              </div>
+              <div
+                className={`bg-gray-50 rounded-lg p-4 overflow-hidden transition-all ${
+                  isExpanded ? 'max-h-96 overflow-y-auto' : 'max-h-32'
+                }`}
+              >
+                <pre className="text-xs text-gray-700 whitespace-pre-wrap font-mono">
+                  {result.text}
+                </pre>
+              </div>
+              {!isExpanded && (
+                <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-50 to-transparent pointer-events-none" />
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4">
+              <button
+                onClick={handleRemoveFile}
+                className="flex-1 py-3 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Screen Another Resume
+              </button>
+              <button className="flex-1 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors">
+                Download Report
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,23 @@
+{
+  "programming": ["python", "java", "c++", "javascript", "typescript", "go", "rust"],
+  "ml": ["scikit-learn", "tensorflow", "pytorch", "xgboost", "nlp", "computer vision"],
+  "nlp": ["tokenization", "ner", "pos tagging", "spacy", "nltk", "tf-idf", "embeddings"],
+  "data": ["sql", "postgresql", "mysql", "mongodb", "etl", "data modeling", "pandas", "numpy"],
+  "cloud": ["aws", "azure", "gcp", "docker", "kubernetes", "lambda", "s3", "ec2"],
+  "tools": ["git", "jira", "linux", "bash", "fastapi", "flask"],
+  "teaching": [
+    "lesson planning",
+    "classroom management",
+    "child psychology",
+    "activity-based learning",
+    "creative teaching",
+    "student development",
+    "communication",
+    "interpersonal skills",
+    "patience",
+    "curriculum",
+    "assessment",
+    "classroom management basics",
+    "activity based learning"
+  ]
+}
